@@ -241,6 +241,13 @@
       color: var(--azul-med);
     }
 
+    .card-valor.nd {
+      color: var(--gris2);
+      font-size: 14px;
+      font-style: italic;
+      font-family: 'IBM Plex Sans', sans-serif;
+    }
+
     /* Barra de progreso pago */
     .barra-wrap {
       margin-top: 10px;
@@ -310,6 +317,7 @@
 
 <script>
 var datos = [
+  /* ── Registros originales ── */
   { organismo:"Secretaría de Movilidad de Medellín",                                            inicio:"10/12/2018", final:"28/04/2020", impuestos:"717.318",   pagados:"147.003", recaudado:"$62.415.361" },
   { organismo:"División de Tránsito y Transporte de La Dorada",                                 inicio:"10/12/2018", final:"03/09/2019", impuestos:"16.458",    pagados:"5.363",   recaudado:"$3.556.475" },
   { organismo:"Inspección Municipal de Tránsito de Villavicencio",                              inicio:"10/12/2018", final:"20/10/2019", impuestos:"16.330",    pagados:"3.405",   recaudado:"$2.342.176" },
@@ -323,7 +331,21 @@ var datos = [
   { organismo:"Secretaría de Movilidad de Bello",                                              inicio:"27/02/2019", final:"18/02/2020", impuestos:"103.842",   pagados:"13.468",  recaudado:"$9.868.468" },
   { organismo:"Instituto Municipal de Tránsito y Transporte de Soledad",                       inicio:"26/03/2019", final:"09/12/2019", impuestos:"18.978",    pagados:"3.220",   recaudado:"$2.086.329" },
   { organismo:"Secretaría de tránsito y Transporte de la Alcaldía de San José de Cúcuta",     inicio:"26/03/2019", final:"21/11/2024", impuestos:"295.755",   pagados:"66.353",  recaudado:"$53.001.418" },
-  { organismo:"Secretaría de Movilidad Contemporánea de Cundinamarca",                         inicio:"30/04/2019", final:"21/11/2024", impuestos:"406.509",   pagados:"109.002", recaudado:"$104.433.257" }
+  { organismo:"Secretaría de Movilidad Contemporánea de Cundinamarca",                         inicio:"30/04/2019", final:"21/11/2024", impuestos:"406.509",   pagados:"109.002", recaudado:"$104.433.257" },
+
+  /* ── Nuevos registros ── */
+  { organismo:"Instituto Municipal de Tránsito y Transporte de Aguachica",                     inicio:"27/11/2024", final:"17/03/2025" },
+  { organismo:"Inspección de Tránsito y Transporte de Barrancabermeja",                        inicio:"21/11/2024", final:"30/05/2025" },
+  { organismo:"Secretaría de Movilidad de Bello",                                              inicio:"01/12/2025", final:"28/04/2026" },
+  { organismo:"Secretaría Distrital de Movilidad Bogotá",                                      inicio:"21/11/2024", final:"23/07/2025" },
+  { organismo:"Secretaría de Movilidad y Transporte de Cartago",                               inicio:"21/11/2024", final:"11/07/2025" },
+  { organismo:"Secretaría de Movilidad Contemporánea de Cundinamarca",                         inicio:"21/11/2024", final:"22/05/2025" },
+  { organismo:"Instituto Municipal de Tránsito y Transporte de Fundación (INTRASFUN)",         inicio:"21/11/2024", final:"14/01/2025" },
+  { organismo:"Secretaría de Movilidad de Medellín",                                           inicio:"21/11/2024", final:"23/07/2025" },
+  { organismo:"Instituto Departamental de Tránsito del Cesar",                                 inicio:"09/11/2025", final:"17/02/2026" },
+  { organismo:"Secretaría de Movilidad y Transporte del Valle del Cauca",                      inicio:"11/02/2026", final:"02/03/2026" },
+  { organismo:"Secretaría de Movilidad Multimodal y Sostenible de Santa Marta",               inicio:"21/11/2024", final:"04/03/2025" },
+  { organismo:"Secretaría de Tránsito y Transporte de Valledupar",                             inicio:"15/03/2024", final:"13/08/2025" }
 ];
 
 function normalizar(t) {
@@ -331,6 +353,7 @@ function normalizar(t) {
 }
 
 function parsearNumero(s) {
+  if (!s) return 0;
   return parseInt(s.replace(/\./g,""), 10) || 0;
 }
 
@@ -342,7 +365,19 @@ function calcularPct(pagados, impuestos) {
 }
 
 function crearResultado(item) {
-  var pct = calcularPct(item.pagados, item.impuestos);
+  var tieneComparendos = item.impuestos && item.pagados && item.recaudado;
+  var pct = tieneComparendos ? calcularPct(item.pagados, item.impuestos) : 0;
+
+  var tarjetasComparendos = tieneComparendos
+    ? '<div class="card"><div class="card-label">Comparendos impuestos</div><div class="card-valor">' + item.impuestos + '</div></div>'
+    + '<div class="card"><div class="card-label">Comparendos pagados</div><div class="card-valor highlight">' + item.pagados
+    + '<div class="barra-wrap"><div class="barra-fill" style="width:' + pct + '%"></div></div>'
+    + '<div class="barra-pct">' + pct + '% del total</div></div></div>'
+    + '<div class="card"><div class="card-label">Recaudado</div><div class="card-valor highlight">' + item.recaudado + '</div></div>'
+    : '<div class="card"><div class="card-label">Comparendos impuestos</div><div class="card-valor nd">Sin datos</div></div>'
+    + '<div class="card"><div class="card-label">Comparendos pagados</div><div class="card-valor nd">Sin datos</div></div>'
+    + '<div class="card"><div class="card-label">Recaudado</div><div class="card-valor nd">Sin datos</div></div>';
+
   return '<div class="resultado">'
     + '<div class="resultado-header">'
     + '<div class="resultado-icono">'
@@ -353,11 +388,7 @@ function crearResultado(item) {
     + '<div class="grid">'
     + '<div class="card"><div class="card-label">Fecha inicial</div><div class="card-valor">' + item.inicio + '</div></div>'
     + '<div class="card"><div class="card-label">Fecha final</div><div class="card-valor">' + item.final + '</div></div>'
-    + '<div class="card"><div class="card-label">Comparendos impuestos</div><div class="card-valor">' + item.impuestos + '</div></div>'
-    + '<div class="card"><div class="card-label">Comparendos pagados</div><div class="card-valor highlight">' + item.pagados
-    + '<div class="barra-wrap"><div class="barra-fill" style="width:' + pct + '%"></div></div>'
-    + '<div class="barra-pct">' + pct + '% del total</div></div></div>'
-    + '<div class="card"><div class="card-label">Recaudado</div><div class="card-valor highlight">' + item.recaudado + '</div></div>'
+    + tarjetasComparendos
     + '</div></div>';
 }
 
